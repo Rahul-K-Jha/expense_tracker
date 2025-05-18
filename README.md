@@ -6,6 +6,42 @@ This project is an **Expense Tracker** application designed to help users manage
 - **Frontend:** Flutter (to be developed)
 - **Backend/Storage:** Google Sheets (used as a database to store expense data)
 
+## Architecture
+This project follows the **Clean Architecture** pattern for scalable, testable, and maintainable code.
+
+### Folder Structure
+```
+lib/
+│
+├── core/                        # Shared utilities, themes, etc.
+│
+├── features/
+│   ├── expense/
+│   │   ├── data/                # Data sources, models, repositories (implementation)
+│   │   │   └── services/
+│   │   │       └── google_sheets_service.dart
+│   │   ├── domain/              # Entities, repositories (abstract), use cases
+│   │   └── presentation/
+│   │       ├── bloc/            # BLoC files for expense feature
+│   │       │   ├── expense_bloc.dart
+│   │       │   ├── expense_event.dart
+│   │       │   └── expense_state.dart
+│   │       └── screens/
+│   │           └── splash_screen.dart
+│   │
+│   └── sheet_selector/
+│       ├── data/
+│       ├── domain/
+│       └── presentation/
+│           ├── bloc/            # BLoC files for sheet selector feature
+│           │   ├── sheet_selector_bloc.dart
+│           │   ├── sheet_selector_event.dart
+│           │   └── sheet_selector_state.dart
+│           └── screens/
+│
+└── main.dart
+```
+
 ## Features (Planned)
 - Add, edit, and delete expenses
 - Categorize expenses
@@ -14,11 +50,13 @@ This project is an **Expense Tracker** application designed to help users manage
 
 ## How It Works
 1. **User Interface:**
-   - The app will provide a clean and intuitive UI built with Flutter for both Android and iOS platforms.
+   - The app provides a clean and intuitive UI built with Flutter for both Android and iOS platforms.
 2. **Data Storage:**
-   - All expense data will be stored in a Google Sheet, allowing for easy access, backup, and sharing.
+   - All expense data is stored in a Google Sheet, allowing for easy access, backup, and sharing.
 3. **Integration:**
-   - The app will use Google Sheets API to read and write expense data securely.
+   - The app uses Google Sheets API to read and write expense data securely.
+4. **State Management:**
+   - The app uses the BLoC pattern for state management, with each feature having its own BLoC under the `presentation/bloc/` folder.
 
 ## Getting Started
 1. Clone this repository.

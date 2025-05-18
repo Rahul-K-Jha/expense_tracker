@@ -19,10 +19,12 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         useMaterial3: true,
       ),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const SplashScreen(),
-        '/home': (context) => const SheetSelectorPage(),
+      onGenerateRoute: (settings) {
+        if (settings.name == '/home') {
+          return MaterialPageRoute(builder: (context) => const SheetSelectorPage());
+        }
+        // Always show SplashScreen for any other or unknown route
+        return MaterialPageRoute(builder: (context) => const SplashScreen());
       },
     );
   }
@@ -43,7 +45,7 @@ class _SheetSelectorPageState extends State<SheetSelectorPage> {
   @override
   void initState() {
     super.initState();
-    _loadSheetNames();
+    // _loadSheetNames();
   }
 
   Future<void> _loadSheetNames() async {

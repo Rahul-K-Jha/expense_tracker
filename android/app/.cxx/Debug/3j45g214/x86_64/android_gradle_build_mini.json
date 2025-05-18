@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "E:\\All Software Setup\\Flutter Setup\\flutter\\packages\\flutter_tools\\gradle\\src\\main\\groovy\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "C:\\Users\\HP\\AppData\\Local\\Android\\sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+      "-C",
+      "E:\\All Flutter Projects\\Cursor AI Projects\\Expense Tracker\\expense_tracker\\android\\app\\.cxx\\Debug\\3j45g214\\x86_64",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "C:\\Users\\HP\\AppData\\Local\\Android\\sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+    "-C",
+    "E:\\All Flutter Projects\\Cursor AI Projects\\Expense Tracker\\expense_tracker\\android\\app\\.cxx\\Debug\\3j45g214\\x86_64",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}
