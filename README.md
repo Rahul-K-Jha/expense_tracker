@@ -9,37 +9,74 @@ This project is an **Expense Tracker** application designed to help users manage
 ## Architecture
 This project follows the **Clean Architecture** pattern for scalable, testable, and maintainable code.
 
+### SOLID Principles in Flutter Project Structure
+This project structure is designed to adhere to the SOLID principles, ensuring maintainability and scalability:
+
+**S - Single Responsibility Principle (SRP)**
+- **Core Directory:** Each subdirectory in `/core` has a single responsibility (e.g., `/core/errors` for error classes, `/core/utils` for utilities, `/core/di` for dependency injection).
+- **Feature Directory:** Each feature (e.g., `/features/expense`) separates concerns:
+  - `/domain` for business logic and entities
+  - `/data` for data handling
+  - `/presentation` for UI and state management
+- **Blocs:** Located in the presentation layer, each BLoC manages the state of a specific UI component.
+
+**O - Open/Closed Principle (OCP)**
+- **Entities:** Entities in `/domain` are open for extension but closed for modification.
+- **Use Cases:** New business logic can be added as new use cases without modifying existing ones.
+- **Repositories:** Abstract repositories in `/domain` and concrete implementations in `/data` allow new data sources or changes without affecting dependent code.
+
+**L - Liskov Substitution Principle (LSP)**
+- **Repository Implementations:** Any concrete repository in `/data` can substitute the abstract repository in `/domain` without breaking functionality.
+
+**I - Interface Segregation Principle (ISP)**
+- **Repository Interfaces:** The structure encourages focused repository interfaces in `/domain`, promoting small, specific interfaces rather than large, catch-all ones.
+
+**D - Dependency Inversion Principle (DIP)**
+- **Layered Architecture:**
+  - High-level modules (use cases in `/domain`, blocs in `/presentation`) depend on abstractions (repository interfaces in `/domain`).
+  - Low-level modules (data sources, repository implementations in `/data`) also depend on abstractions.
+- **Dependency Injection:** The `/core/di` directory is dedicated to dependency injection, allowing dependencies to be injected and decoupling components.
+
 ### Folder Structure
 ```
 lib/
-│
-├── core/                        # Shared utilities, themes, etc.
-│
-├── features/
-│   ├── expense/
-│   │   ├── data/                # Data sources, models, repositories (implementation)
-│   │   │   └── services/
-│   │   │       └── google_sheets_service.dart
-│   │   ├── domain/              # Entities, repositories (abstract), use cases
-│   │   └── presentation/
-│   │       ├── bloc/            # BLoC files for expense feature
-│   │       │   ├── expense_bloc.dart
-│   │       │   ├── expense_event.dart
-│   │       │   └── expense_state.dart
-│   │       └── screens/
-│   │           └── splash_screen.dart
-│   │
-│   └── sheet_selector/
-│       ├── data/
-│       ├── domain/
-│       └── presentation/
-│           ├── bloc/            # BLoC files for sheet selector feature
-│           │   ├── sheet_selector_bloc.dart
-│           │   ├── sheet_selector_event.dart
-│           │   └── sheet_selector_state.dart
-│           └── screens/
-│
-└── main.dart
+  core/
+    constants/        # Application-wide constants
+    errors/           # Custom exception classes
+    utils/            # Utility functions
+    services/         # Core services (e.g., network, local storage)
+    di/               # Dependency Injection setup
+    widgets/          # Reusable widgets
+  features/
+    expense/          # Feature: Expense Tracking
+      data/
+        datasources/    # Implementations of data sources (remote, local)
+          google_sheets_service.dart  # Google Sheets API integration
+        models/         # Data Transfer Objects (DTOs) for API/database
+        repositories/   # Implementations of repository interfaces
+      domain/
+        entities/       # Core business entities
+        repositories/   # Abstract repository interfaces
+        usecases/       # Business logic use cases
+      presentation/
+        bloc/           # Bloc for state management
+        screens/        # UI screens/pages
+        widgets/        # UI-specific widgets
+    sheet_selector/   # Feature: Sheet Selection
+      data/
+        datasources/
+        models/
+        repositories/
+      domain/
+        entities/
+        repositories/
+        usecases/
+      presentation/
+        bloc/
+        screens/
+        widgets/
+  configs/            # Configuration files
+  main.dart           # Application entry point
 ```
 
 ## Features (Planned)
