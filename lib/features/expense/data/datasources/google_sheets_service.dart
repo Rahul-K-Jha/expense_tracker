@@ -1,6 +1,5 @@
 import 'package:googleapis/sheets/v4.dart' as sheets;
 import 'package:googleapis_auth/auth_io.dart';
-import 'package:http/http.dart' as http;
 
 class GoogleSheetsService {
   final String spreadsheetId;
