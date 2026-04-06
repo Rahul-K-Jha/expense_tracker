@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/services/auth_service.dart';
 import '../../../../injection.dart';
@@ -23,12 +24,72 @@ class _SignInScreenState extends State<SignInScreen> {
       setState(() => _isLoading = false);
 
       if (user != null) {
-        Navigator.pushReplacementNamed(context, '/home');
+        // Ask for spreadsheet ID and register sheets service
+        await _promptSpreadsheetId();
+        if (mounted) Navigator.pushReplacementNamed(context, '/home');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Sign-in failed. Please try again.')),
         );
       }
+    }
+  }
+
+  Future<void> _promptSpreadsheetId() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedId = prefs.getString('spreadsheet_id');
+
+    if (savedId != null && savedId.isNotEmpty) {
+      await _registerSheetsService(savedId);
+      return;
+    }
+
+    if (!mounted) return;
+
+    final controller = TextEditingController();
+    final id = await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Google Sheets Setup'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Enter your Google Spreadsheet ID to sync expenses.'),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'Spreadsheet ID',
+                hintText: 'From the URL: docs.google.com/spreadsheets/d/{ID}',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, ''),
+            child: const Text('Skip'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            child: const Text('Connect'),
+          ),
+        ],
+      ),
+    );
+
+    if (id != null && id.isNotEmpty) {
+      await prefs.setString('spreadsheet_id', id);
+      await _registerSheetsService(id);
+    }
+  }
+
+  Future<void> _registerSheetsService(String spreadsheetId) async {
+    final service = await _authService.createSheetsService(spreadsheetId);
+    if (service != null) {
+      registerGoogleSheetsService(service);
     }
   }
 

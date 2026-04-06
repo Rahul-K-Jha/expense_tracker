@@ -1,3 +1,5 @@
+import 'package:get_it/get_it.dart';
+
 import '../datasources/google_sheets_service.dart';
 import '../datasources/local_expense_datasource.dart';
 import '../models/expense_model.dart';
@@ -5,33 +7,45 @@ import '../../domain/entities/expense.dart';
 import '../../domain/repositories/expense_repository.dart';
 
 class ExpenseRepositoryImpl implements ExpenseRepository {
-  final GoogleSheetsService sheetsService;
   final LocalExpenseDatasource localDatasource;
   final String sheetName;
 
   ExpenseRepositoryImpl({
-    required this.sheetsService,
     required this.localDatasource,
     this.sheetName = 'Expenses',
   });
 
+  /// Returns GoogleSheetsService if registered, null otherwise.
+  GoogleSheetsService? get _sheetsService {
+    final getIt = GetIt.instance;
+    if (getIt.isRegistered<GoogleSheetsService>()) {
+      return getIt<GoogleSheetsService>();
+    }
+    return null;
+  }
+
   @override
   Future<List<Expense>> getExpenses() async {
-    try {
-      await sheetsService.ensureHeaders(sheetName, ExpenseModel.sheetHeaders);
-      final rows = await sheetsService.getRows(sheetName);
-      final expenses = rows
-          .where((row) => row.isNotEmpty && row[0] != null && row[0].toString().isNotEmpty)
-          .map((row) => ExpenseModel.fromSheetRow(row))
-          .toList();
+    final sheets = _sheetsService;
+    if (sheets != null) {
+      try {
+        await sheets.ensureHeaders(sheetName, ExpenseModel.sheetHeaders);
+        final rows = await sheets.getRows(sheetName);
+        final expenses = rows
+            .where((row) => row.isNotEmpty && row[0] != null && row[0].toString().isNotEmpty)
+            .map((row) => ExpenseModel.fromSheetRow(row))
+            .toList();
 
-      // Cache to local storage
-      await localDatasource.saveAll(expenses);
-      return expenses;
-    } catch (_) {
-      // Fallback to local cache when offline
-      return localDatasource.getAll();
+        // Cache to local storage
+        await localDatasource.saveAll(expenses);
+        return expenses;
+      } catch (_) {
+        // Fallback to local cache when offline
+        return localDatasource.getAll();
+      }
     }
+    // No sheets service — offline only
+    return localDatasource.getAll();
   }
 
   @override
@@ -50,37 +64,64 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
 
   @override
   Future<Expense> addExpense(Expense expense) async {
-    await sheetsService.ensureHeaders(sheetName, ExpenseModel.sheetHeaders);
     final model = ExpenseModel.fromEntity(expense);
-    await sheetsService.appendRow(sheetName, model.toSheetRow());
+
+    final sheets = _sheetsService;
+    if (sheets != null) {
+      try {
+        await sheets.ensureHeaders(sheetName, ExpenseModel.sheetHeaders);
+        await sheets.appendRow(sheetName, model.toSheetRow());
+      } catch (_) {
+        // Sheets failed — still save locally
+      }
+    }
+
     await localDatasource.addExpense(model);
     return expense;
   }
 
   @override
   Future<Expense> updateExpense(Expense expense) async {
-    final rowIndex = await _findRowIndex(expense.id);
-    if (rowIndex == null) {
-      throw Exception('Expense not found: ${expense.id}');
-    }
     final model = ExpenseModel.fromEntity(expense);
-    await sheetsService.updateRow(sheetName, rowIndex, model.toSheetRow());
-    await localDatasource.addExpense(model); // overwrite in cache
+
+    final sheets = _sheetsService;
+    if (sheets != null) {
+      try {
+        final rowIndex = await _findRowIndex(expense.id);
+        if (rowIndex != null) {
+          await sheets.updateRow(sheetName, rowIndex, model.toSheetRow());
+        }
+      } catch (_) {
+        // Sheets failed — still update locally
+      }
+    }
+
+    await localDatasource.addExpense(model);
     return expense;
   }
 
   @override
   Future<void> deleteExpense(String id) async {
-    final rowIndex = await _findRowIndex(id);
-    if (rowIndex == null) {
-      throw Exception('Expense not found: $id');
+    final sheets = _sheetsService;
+    if (sheets != null) {
+      try {
+        final rowIndex = await _findRowIndex(id);
+        if (rowIndex != null) {
+          await sheets.clearRow(sheetName, rowIndex);
+        }
+      } catch (_) {
+        // Sheets failed — still delete locally
+      }
     }
-    await sheetsService.clearRow(sheetName, rowIndex);
+
     await localDatasource.deleteExpense(id);
   }
 
   Future<int?> _findRowIndex(String id) async {
-    final rows = await sheetsService.getRows(sheetName);
+    final sheets = _sheetsService;
+    if (sheets == null) return null;
+
+    final rows = await sheets.getRows(sheetName);
     for (int i = 0; i < rows.length; i++) {
       if (rows[i].isNotEmpty && rows[i][0].toString() == id) {
         return i + 2;

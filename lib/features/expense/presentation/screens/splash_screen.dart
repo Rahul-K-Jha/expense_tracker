@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/services/auth_service.dart';
+import '../../../../core/services/biometric_service.dart';
+import '../../../../injection.dart';
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -34,12 +38,34 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     _controller.forward();
 
-    // Navigate to main screen after animation
+    // Navigate after animation completes
     Future.delayed(const Duration(milliseconds: 6000), () {
-      if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/home');
-      }
+      if (mounted) _navigateNext();
     });
+  }
+
+  Future<void> _navigateNext() async {
+    final navigator = Navigator.of(context);
+    final authService = getIt<AuthService>();
+    final biometricService = getIt<BiometricService>();
+
+    // Try silent sign-in first
+    final silentSuccess = await authService.trySilentSignIn();
+
+    if (!mounted) return;
+
+    if (silentSuccess) {
+      // Already signed in — check biometric lock
+      final biometricEnabled = await biometricService.isBiometricEnabled();
+      if (biometricEnabled) {
+        navigator.pushReplacementNamed('/lock');
+      } else {
+        navigator.pushReplacementNamed('/home');
+      }
+    } else {
+      // Not signed in — show sign-in screen
+      navigator.pushReplacementNamed('/sign-in');
+    }
   }
 
   @override

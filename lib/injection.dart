@@ -36,10 +36,9 @@ Future<void> configureDependencies() async {
   // Remote data source
   // GoogleSheetsService is registered at runtime after auth via registerGoogleSheetsService()
 
-  // Repository
+  // Repository (works offline by default, sheets service is optional)
   getIt.registerLazySingleton<ExpenseRepository>(
     () => ExpenseRepositoryImpl(
-      sheetsService: getIt<GoogleSheetsService>(),
       localDatasource: getIt<LocalExpenseDatasource>(),
     ),
   );
