@@ -5,10 +5,15 @@ import 'package:expense_tracker/features/expense/presentation/screens/add_expens
 import 'package:expense_tracker/features/expense/presentation/screens/budget_screen.dart';
 import 'package:expense_tracker/features/expense/presentation/screens/category_management_screen.dart';
 import 'package:expense_tracker/features/expense/presentation/screens/dashboard_screen.dart';
+import 'package:expense_tracker/features/expense/presentation/screens/goals_screen.dart';
 import 'package:expense_tracker/features/expense/presentation/screens/home_screen.dart';
 import 'package:expense_tracker/features/expense/presentation/screens/insights_screen.dart';
+import 'package:expense_tracker/features/expense/presentation/screens/lock_screen.dart';
 import 'package:expense_tracker/features/expense/presentation/screens/receipt_scanner_screen.dart';
 import 'package:expense_tracker/features/expense/presentation/screens/recurring_expenses_screen.dart';
+import 'package:expense_tracker/features/expense/presentation/screens/sign_in_screen.dart';
+import 'package:expense_tracker/features/expense/presentation/screens/split_expense_screen.dart';
+import 'package:expense_tracker/features/expense/presentation/screens/voice_input_screen.dart';
 import 'package:expense_tracker/features/expense/domain/entities/expense.dart';
 import 'package:expense_tracker/features/sheet_selector/presentation/screens/sheet_selector.dart';
 import 'package:expense_tracker/features/expense/presentation/screens/splash_screen.dart';
@@ -54,6 +59,16 @@ class App extends StatelessWidget {
                   return MaterialPageRoute(builder: (_) => const InsightsScreen());
                 case '/recurring':
                   return MaterialPageRoute(builder: (_) => const RecurringExpensesScreen());
+                case '/sign-in':
+                  return MaterialPageRoute(builder: (_) => const SignInScreen());
+                case '/lock':
+                  return MaterialPageRoute(builder: (_) => const LockScreen());
+                case '/voice-input':
+                  return MaterialPageRoute(builder: (_) => const VoiceInputScreen());
+                case '/goals':
+                  return MaterialPageRoute(builder: (_) => const GoalsScreen());
+                case '/split':
+                  return MaterialPageRoute(builder: (_) => const SplitExpenseScreen());
                 case '/sheet-selector':
                   return MaterialPageRoute(builder: (_) => const SheetSelectorPage());
                 default:

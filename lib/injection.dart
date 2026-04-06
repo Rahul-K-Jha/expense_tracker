@@ -1,6 +1,11 @@
 import 'package:get_it/get_it.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+import 'core/services/auth_service.dart';
+import 'core/services/biometric_service.dart';
+import 'core/services/notification_service.dart';
+import 'core/services/widget_service.dart';
+import 'features/expense/data/datasources/export_service.dart';
 import 'features/expense/data/datasources/google_sheets_service.dart';
 import 'features/expense/data/datasources/local_expense_datasource.dart';
 import 'features/expense/data/repositories/expense_repository_impl.dart';
@@ -18,13 +23,18 @@ Future<void> configureDependencies() async {
   // Initialize Hive for local storage
   await Hive.initFlutter();
 
+  // Core services
+  getIt.registerLazySingleton(() => AuthService());
+  getIt.registerLazySingleton(() => NotificationService());
+  getIt.registerLazySingleton(() => ExportService());
+  getIt.registerLazySingleton(() => BiometricService());
+  getIt.registerLazySingleton(() => WidgetService());
+
   // Local data source
   getIt.registerLazySingleton(() => LocalExpenseDatasource());
 
   // Remote data source
-  // GoogleSheetsService requires runtime auth — register externally
-  // after authentication is complete via:
-  //   getIt.registerLazySingleton<GoogleSheetsService>(() => service);
+  // GoogleSheetsService is registered at runtime after auth via registerGoogleSheetsService()
 
   // Repository
   getIt.registerLazySingleton<ExpenseRepository>(
@@ -49,4 +59,15 @@ Future<void> configureDependencies() async {
         deleteExpense: getIt<DeleteExpense>(),
         getExpensesByCategory: getIt<GetExpensesByCategory>(),
       ));
+
+  // Initialize notifications
+  await getIt<NotificationService>().initialize();
+}
+
+/// Call after successful Google Sign-In to register the sheets service.
+void registerGoogleSheetsService(GoogleSheetsService service) {
+  if (getIt.isRegistered<GoogleSheetsService>()) {
+    getIt.unregister<GoogleSheetsService>();
+  }
+  getIt.registerSingleton<GoogleSheetsService>(service);
 }
