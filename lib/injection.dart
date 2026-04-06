@@ -1,18 +1,41 @@
 import 'package:get_it/get_it.dart';
 
+import 'features/expense/data/datasources/google_sheets_service.dart';
+import 'features/expense/data/repositories/expense_repository_impl.dart';
+import 'features/expense/domain/repositories/expense_repository.dart';
+import 'features/expense/domain/usecases/add_expense.dart';
+import 'features/expense/domain/usecases/delete_expense.dart';
+import 'features/expense/domain/usecases/get_expenses.dart';
+import 'features/expense/domain/usecases/get_expenses_by_category.dart';
+import 'features/expense/domain/usecases/update_expense.dart';
+import 'features/expense/presentation/bloc/expense_bloc.dart';
+
 final GetIt getIt = GetIt.instance;
 
-class DemoService {
-  String getMessage() => 'Hello from DemoService!';
-}
-
 Future<void> configureDependencies() async {
-  // Register DemoService as a singleton
-  getIt.registerLazySingleton<DemoService>(() => DemoService());
-  // Register your other services, repositories, blocs, etc. here
-  // getIt.registerFactory<SomeBloc>(() => SomeBloc(getIt()));
-}
+  // Data sources
+  // GoogleSheetsService requires runtime auth — register externally
+  // after authentication is complete via:
+  //   getIt.registerLazySingleton<GoogleSheetsService>(() => service);
 
-// Example usage elsewhere in your app:
-// final demoService = getIt<DemoService>();
-// print(demoService.getMessage()); 
+  // Repository
+  getIt.registerLazySingleton<ExpenseRepository>(
+    () => ExpenseRepositoryImpl(sheetsService: getIt<GoogleSheetsService>()),
+  );
+
+  // Use cases
+  getIt.registerLazySingleton(() => GetExpenses(getIt<ExpenseRepository>()));
+  getIt.registerLazySingleton(() => AddExpense(getIt<ExpenseRepository>()));
+  getIt.registerLazySingleton(() => UpdateExpense(getIt<ExpenseRepository>()));
+  getIt.registerLazySingleton(() => DeleteExpense(getIt<ExpenseRepository>()));
+  getIt.registerLazySingleton(() => GetExpensesByCategory(getIt<ExpenseRepository>()));
+
+  // BLoC
+  getIt.registerFactory(() => ExpenseBloc(
+        getExpenses: getIt<GetExpenses>(),
+        addExpense: getIt<AddExpense>(),
+        updateExpense: getIt<UpdateExpense>(),
+        deleteExpense: getIt<DeleteExpense>(),
+        getExpensesByCategory: getIt<GetExpensesByCategory>(),
+      ));
+}
