@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
+import '../../data/datasources/auto_categorizer.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/entities/expense.dart';
 import '../../domain/entities/payment_method.dart';
@@ -111,6 +112,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         hintText: 'e.g. Lunch at cafe',
         border: OutlineInputBorder(),
       ),
+      onChanged: (value) {
+        if (!_isEditing && value.length > 2) {
+          final suggested = AutoCategorizer.suggestCategory(value);
+          if (suggested != null && suggested.id != _selectedCategory.id) {
+            setState(() => _selectedCategory = suggested);
+          }
+        }
+      },
       validator: (value) {
         if (value == null || value.trim().isEmpty) return 'Enter a description';
         return null;

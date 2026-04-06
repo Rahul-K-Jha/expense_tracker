@@ -6,6 +6,9 @@ import 'package:expense_tracker/features/expense/presentation/screens/budget_scr
 import 'package:expense_tracker/features/expense/presentation/screens/category_management_screen.dart';
 import 'package:expense_tracker/features/expense/presentation/screens/dashboard_screen.dart';
 import 'package:expense_tracker/features/expense/presentation/screens/home_screen.dart';
+import 'package:expense_tracker/features/expense/presentation/screens/insights_screen.dart';
+import 'package:expense_tracker/features/expense/presentation/screens/receipt_scanner_screen.dart';
+import 'package:expense_tracker/features/expense/presentation/screens/recurring_expenses_screen.dart';
 import 'package:expense_tracker/features/expense/domain/entities/expense.dart';
 import 'package:expense_tracker/features/sheet_selector/presentation/screens/sheet_selector.dart';
 import 'package:expense_tracker/features/expense/presentation/screens/splash_screen.dart';
@@ -45,6 +48,12 @@ class App extends StatelessWidget {
                   return MaterialPageRoute(builder: (_) => const BudgetScreen());
                 case '/categories':
                   return MaterialPageRoute(builder: (_) => const CategoryManagementScreen());
+                case '/scan-receipt':
+                  return MaterialPageRoute(builder: (_) => const ReceiptScannerScreen());
+                case '/insights':
+                  return MaterialPageRoute(builder: (_) => const InsightsScreen());
+                case '/recurring':
+                  return MaterialPageRoute(builder: (_) => const RecurringExpensesScreen());
                 case '/sheet-selector':
                   return MaterialPageRoute(builder: (_) => const SheetSelectorPage());
                 default:

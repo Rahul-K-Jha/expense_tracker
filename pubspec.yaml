@@ -23,6 +23,14 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   path_provider: ^2.1.5
+  image_picker: ^1.1.2
+  google_mlkit_text_recognition: ^0.14.0
+  flutter_local_notifications: ^18.0.1
+  permission_handler: ^11.3.1
+  csv: ^6.0.0
+  pdf: ^3.11.1
+  open_file: ^3.5.10
+  share_plus: ^10.1.4
 
 dev_dependencies:
   flutter_test:
