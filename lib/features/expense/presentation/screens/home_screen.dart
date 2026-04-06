@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/theme/theme_cubit.dart';
 import '../../domain/entities/expense.dart';
 import '../bloc/expense_bloc.dart';
 import '../bloc/expense_event.dart';
 import '../bloc/expense_state.dart';
+import '../widgets/expense_search_delegate.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -16,9 +18,53 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Expense Tracker'),
         actions: [
+          Builder(
+            builder: (innerContext) {
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () async {
+                  final navigator = Navigator.of(innerContext);
+                  final state = innerContext.read<ExpenseBloc>().state;
+                  final expenses = state is ExpenseLoaded ? state.expenses : <Expense>[];
+                  final selected = await showSearch(
+                    context: innerContext,
+                    delegate: ExpenseSearchDelegate(expenses),
+                  );
+                  if (selected != null) {
+                    navigator.pushNamed('/add-expense', arguments: selected);
+                  }
+                },
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.dashboard),
+            onPressed: () => Navigator.pushNamed(context, '/dashboard'),
+          ),
           IconButton(
             icon: const Icon(Icons.filter_list),
             onPressed: () => _showFilterSheet(context),
+          ),
+          BlocBuilder<ThemeCubit, ThemeMode>(
+            builder: (context, mode) {
+              IconData icon;
+              switch (mode) {
+                case ThemeMode.light:
+                  icon = Icons.light_mode;
+                  break;
+                case ThemeMode.dark:
+                  icon = Icons.dark_mode;
+                  break;
+                case ThemeMode.system:
+                  icon = Icons.brightness_auto;
+                  break;
+              }
+              return IconButton(
+                icon: Icon(icon),
+                onPressed: () => context.read<ThemeCubit>().toggleTheme(),
+                tooltip: 'Theme: ${mode.name}',
+              );
+            },
           ),
         ],
       ),
@@ -213,7 +259,7 @@ class HomeScreen extends StatelessWidget {
       },
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: expense.category.color.withOpacity(0.2),
+          backgroundColor: expense.category.color.withValues(alpha: 0.2),
           child: Icon(expense.category.icon, color: expense.category.color),
         ),
         title: Text(expense.description),

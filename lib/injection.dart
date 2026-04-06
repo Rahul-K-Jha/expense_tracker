@@ -1,6 +1,8 @@
 import 'package:get_it/get_it.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import 'features/expense/data/datasources/google_sheets_service.dart';
+import 'features/expense/data/datasources/local_expense_datasource.dart';
 import 'features/expense/data/repositories/expense_repository_impl.dart';
 import 'features/expense/domain/repositories/expense_repository.dart';
 import 'features/expense/domain/usecases/add_expense.dart';
@@ -13,14 +15,23 @@ import 'features/expense/presentation/bloc/expense_bloc.dart';
 final GetIt getIt = GetIt.instance;
 
 Future<void> configureDependencies() async {
-  // Data sources
+  // Initialize Hive for local storage
+  await Hive.initFlutter();
+
+  // Local data source
+  getIt.registerLazySingleton(() => LocalExpenseDatasource());
+
+  // Remote data source
   // GoogleSheetsService requires runtime auth — register externally
   // after authentication is complete via:
   //   getIt.registerLazySingleton<GoogleSheetsService>(() => service);
 
   // Repository
   getIt.registerLazySingleton<ExpenseRepository>(
-    () => ExpenseRepositoryImpl(sheetsService: getIt<GoogleSheetsService>()),
+    () => ExpenseRepositoryImpl(
+      sheetsService: getIt<GoogleSheetsService>(),
+      localDatasource: getIt<LocalExpenseDatasource>(),
+    ),
   );
 
   // Use cases
