@@ -1,6 +1,9 @@
 # Android CMake build cache
 android/app/.cxx/
 
+# Claude Code local settings
+.claude/settings.local.json
+
 # Miscellaneous
 *.class
 *.log
